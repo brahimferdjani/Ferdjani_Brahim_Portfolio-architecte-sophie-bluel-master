@@ -146,6 +146,16 @@ async function popupOne() {
     galleryPopup();
 }
 
+function ajouterPhoto(){
+    const ajoutPhoto = document.querySelector(".popup_one button");
+    ajoutPhoto.addEventListener("click",()=>{
+        const popupOne = document.querySelector(".popup_one");
+        const popupTwo = document.querySelector(".popup_two");
+        popupOne.classList.toggle("popup_display_none");
+        popupTwo.classList.toggle("popup_display_none");
+    })
+}
+
 async function galleryPopup() {
     const contentPopupOne = document.querySelector(".popup_one .content");
     const works = await getWorks();
@@ -154,12 +164,43 @@ async function galleryPopup() {
         figure.innerHTML =
         `<a href="#">
         <i class="fa-solid fa-trash-can"></i>
-        <img src="${work.imageUrl}" >
+        <img src="${work.imageUrl}" id="${work.id}">
         </a>`;
-        figure.classList.add("gallery_popupone")
+        figure.classList.add("gallery_popupone");
         contentPopupOne.append(figure);
-
+        figure.addEventListener("click",(event)=>{
+            event.preventDefault();
+            fetchDelete(work.id);
+        })
     })
+}
+
+async function fetchDelete(id) {
+    const url = "http://localhost:5678/api/works/" + id;
+    const localToken = localStorage.token;
+
+    try {
+        const reponse = await fetch(url, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${localToken}` },
+        });
+
+        if (!reponse.ok) {
+            const errorMsgSelect = document.querySelector("#error_message");
+
+            if (reponse.status == "500") {
+                errorMsgSelect.textContent = "Unexpected Behaviour";
+            }
+
+            if (reponse.status == "401") {
+                errorMsgSelect.textContent = "Unauthorized";
+            }
+        }
+
+        return await reponse.json();
+    } catch (error) {
+        console.log("catch de l'appel fetch", error);
+    }
 }
 
 function popupTwo(){
@@ -173,20 +214,25 @@ function popupTwo(){
     <div class="title">
         <h3>Ajout Photo</h3><p class="errorMessage"></p>
     </div>
-    <form class="content">
-        <div>
+    <form>
+        <div class="blue">
             <i class="fa-regular fa-image"></i>
             <img alt="image preview">
             <label for="photo">+ Ajouter photo</label>
             <input type="file" id="photo" name="photo">
+            <p>jpg, png : 4mo max</p>
         </div>
-        <label for="title">Titre</label>
-        <input type="text" id="title" name="title"><br><br>
-        <select name="category" id="category">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-        </select>
+        <div class="titre_categorie">
+            <label for="title">Titre</label>
+            <input type="text" id="title" name="title"><br><br>
+            <label for="category">Categorie</label>
+            <select name="category" id="category">
+                <option></option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </div>
         <button type="button">Valider</button>
     </form>`;
     popupBox.innerHTML = insidePopup;
@@ -196,15 +242,36 @@ function popupTwo(){
     backgroundPopup.appendChild(popupBox);
 }
 
-function popupClose(){
-    const xMark = document.querySelector(".fa-xmark");
+function popupTwoArrow(){
+    const arrow = document.querySelector(".popup_two i.fa-arrow-left");
+    arrow.addEventListener("click", (event)=>{
+        event.preventDefault();
+        const popupTwo = document.querySelector(".popup_two");
+        popupTwo.classList.toggle("popup_display_none");
+        const popupOne = document.querySelector(".popup_one");
+        popupOne.classList.toggle("popup_display_none");
+    })
+}
+
+function popupTwoClose(){
+    const xMark = document.querySelector(".popup_two .fa-xmark");
+    xMark.addEventListener("click",(event)=>{
+        event.preventDefault();
+        const backgroundPopup = document.querySelector(".popupBackground");
+        backgroundPopup.classList.toggle("active");
+        const popupOne = document.querySelector(".popup_two");
+        popupOne.classList.toggle("popup_display_none");
+    })
+}
+
+function popupOneClose(){
+    const xMark = document.querySelector(".popup_one .fa-xmark");
     xMark.addEventListener("click",(event)=>{
         event.preventDefault();
         const backgroundPopup = document.querySelector(".popupBackground");
         backgroundPopup.classList.toggle("active");
         const popupOne = document.querySelector(".popup_one");
         popupOne.classList.toggle("popup_display_none");
-
     })
 }
 
@@ -223,8 +290,11 @@ async function init() {
         popupBackground();
         displayPopupBackground();
         popupOne();
-        popupClose();
+        popupOneClose();
         popupTwo();
+        ajouterPhoto();
+        popupTwoClose();
+        popupTwoArrow();
     }
 }
 
