@@ -365,25 +365,35 @@ a {
 	margin-bottom: 1em;
 }
 
-.popup_two .blue{
-	background-color: aliceblue;
+#blue {
+	padding: 0 2em;
 	width: 50%;
-	padding: 1em 2em;
+	background-color: aliceblue;
 	margin: 0 auto;
 	display: flex;
 	flex-direction: column;
 }
 
-.popup_two i.fa-image{
+#blue img{
+	width: 100%;
+}
+
+.display_blue_content{
+	display: flex;
+	flex-direction: column;
+	padding: 1em 0;
+}
+
+#blue_content i.fa-image{
 	color: rgba(126, 146, 163, 0.442);
 	font-size: 3em;
 }
 
-.popup_two .blue img{
-	display: none;
+#blue_content img{
+	color: #6d7070;
 }
 
-.popup_two .blue label{
+#blue_content label{
 	padding: .5em;
 	width: 60%;
 	font-size: .8em;
@@ -393,11 +403,11 @@ a {
 	color: rgb(71, 116, 135);
 }
 
-.popup_two input[type=file]{
+#image{
 	display: none;
 }
 
-.popup_two .blue p{
+#blue_content p{
 	font-size: .8em;
 	color: rgba(0, 0, 0, 0.553);
 }
@@ -429,17 +439,31 @@ a {
 	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
 }
 
-.popup_two button {
+.validation {
 	width: 40%;
 	border-radius: 60px;
 	padding-bottom: 2em;
 	margin: 0 auto;
 	padding: .5em 2.5em;
 	border: none;
-	background-color: #1D6154;
+	background-color:#1D6154;
 	color: white;
 	font-family: 'Syne';
 	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
 	margin: 1em auto;
 
+}
+
+.hide_elements{
+	visibility: hidden;
+	display: none;
+}
+
+.show_elements{
+	display: block;
+}
+
+.valider {
+	background-color: #929292;
+	color: white;
 }

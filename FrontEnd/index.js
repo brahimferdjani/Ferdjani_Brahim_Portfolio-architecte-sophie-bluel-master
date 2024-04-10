@@ -146,9 +146,9 @@ async function popupOne() {
     galleryPopup();
 }
 
-function ajouterPhoto(){
+function ajouterPhoto() {
     const ajoutPhoto = document.querySelector(".popup_one button");
-    ajoutPhoto.addEventListener("click",()=>{
+    ajoutPhoto.addEventListener("click", () => {
         const popupOne = document.querySelector(".popup_one");
         const popupTwo = document.querySelector(".popup_two");
         popupOne.classList.toggle("popup_display_none");
@@ -162,13 +162,13 @@ async function galleryPopup() {
     works.forEach(work => {
         const figure = document.createElement("figure");
         figure.innerHTML =
-        `<a href="#">
+            `<a href="#">
         <i class="fa-solid fa-trash-can"></i>
         <img src="${work.imageUrl}" id="${work.id}">
         </a>`;
         figure.classList.add("gallery_popupone");
         contentPopupOne.append(figure);
-        figure.addEventListener("click",(event)=>{
+        figure.addEventListener("click", (event) => {
             event.preventDefault();
             fetchDelete(work.id);
         })
@@ -203,11 +203,11 @@ async function fetchDelete(id) {
     }
 }
 
-function popupTwo(){
+function popupTwo() {
     const backgroundPopup = document.querySelector(".popupBackground");
     const popupBox = document.createElement("div");
     const insidePopup =
-        `<div class="header">
+    `<div class="header">
         <a href="#"><i class="fa-solid fa-arrow-left"></i></a>
         <a href="#"><i class="fa-solid fa-xmark"></i></a>
     </div>
@@ -215,12 +215,15 @@ function popupTwo(){
         <h3>Ajout Photo</h3><p class="errorMessage"></p>
     </div>
     <form>
-        <div class="blue">
-            <i class="fa-regular fa-image"></i>
-            <img alt="image preview">
-            <label for="photo">+ Ajouter photo</label>
-            <input type="file" id="photo" name="photo">
-            <p>jpg, png : 4mo max</p>
+        <div id="blue">
+            <img src="" alt="image_preview" class="hide_elements">
+            <div id="blue_content" class="display_blue_content">
+                <i class="fa-regular fa-image"></i>
+                <img src="" alt="image_preview" class="hide_elements">
+                <label for="image">+ Ajouter photo</label>
+                <input type="file" id="image" name="image" accept="image/png, image/jpeg">
+                <p>jpg, png : 4mo max</p>
+            </div>
         </div>
         <div class="titre_categorie">
             <label for="title">Titre</label>
@@ -233,7 +236,7 @@ function popupTwo(){
                 <option value="3">3</option>
             </select>
         </div>
-        <button type="button">Valider</button>
+        <input type="submit" id="valider" class="validation valider" value="Valider">
     </form>`;
     popupBox.innerHTML = insidePopup;
     popupBox.classList.add("popup");
@@ -242,31 +245,132 @@ function popupTwo(){
     backgroundPopup.appendChild(popupBox);
 }
 
-function popupTwoArrow(){
+function submitValidation() {
+
+    const valider = document.querySelector("#valider");
+    const file = document.querySelector("#image");
+    const title = document.querySelector("#title");
+    const category = document.querySelector("#category");
+    if (title.value == " " && category.value == " ") {
+        valider.classList.remove("valider");
+    }
+
+}
+
+function postImage() {
+    const form = document.querySelector(".popup_two form");
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const url = "http://localhost:5678/api/works";
+        const formData = new FormData(form);
+        console.log([...formData]);
+        const localToken = localStorage.token;
+        try {
+            const reponse = await fetch(url, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${localToken}` },
+                body: formData
+            });
+
+            if (!reponse.ok) {
+                const errorMsgSelect = document.querySelector("#error_message");
+
+                if (reponse.status == "500") {
+                    errorMsgSelect.textContent = "Unexpected Error";
+                }
+
+                if (reponse.status == "401") {
+                    errorMsgSelect.textContent = "Unauthorized";
+                }
+
+                if (reponse.status == "400") {
+                    errorMsgSelect.textContent = "Bad Request";
+                }
+            }
+
+            return await reponse.json();
+        } catch (error) {
+            console.log("catch de l'appel fetch", error);
+        }
+    })
+
+}
+
+function previewChange() {
+    const inputFile = document.querySelector("#image");
+    const imagePreview = document.querySelector("#blue img");
+    const file = inputFile.files;
+    const form = document.querySelector(".popup_two form");
+    const blueContent = document.querySelector("#blue_content");
+    inputFile.addEventListener("change", () => {
+        if (file) {
+            blueContent.classList.add("hide_elements");
+            imagePreview.classList.remove("hide_elements");
+
+            const arrow = document.querySelector(".popup_two i.fa-arrow-left");
+            arrow.addEventListener("click", (event) => {
+                event.preventDefault();
+                form.reset();
+                blueContent.classList.remove("hide_elements");
+                imagePreview.classList.add("hide_elements");
+            })
+
+            const xMark = document.querySelector(".popup_two .fa-xmark");
+            xMark.addEventListener("click", (event) => {
+                event.preventDefault();
+                form.reset();
+                blueContent.classList.remove("hide_elements");
+                imagePreview.classList.add("hide_elements");
+            })
+            previewImage();
+        }
+    })
+}
+
+function previewImage() {
+    const inputFile = document.querySelector("#image");
+    const file = inputFile.files;
+    if (file) {
+        const fileReader = new FileReader();
+        const blueImg = document.querySelector("#blue img");
+        fileReader.onload = event => {
+            blueImg.setAttribute('src', event.target.result);
+        }
+        fileReader.readAsDataURL(file[0]);
+        console.log(file);
+    }
+}
+
+function popupTwoArrow() {
     const arrow = document.querySelector(".popup_two i.fa-arrow-left");
-    arrow.addEventListener("click", (event)=>{
+    arrow.addEventListener("click", (event) => {
         event.preventDefault();
         const popupTwo = document.querySelector(".popup_two");
         popupTwo.classList.toggle("popup_display_none");
         const popupOne = document.querySelector(".popup_one");
         popupOne.classList.toggle("popup_display_none");
+        const form = document.querySelector(".popup_two form");
+        form.reset();
     })
 }
 
-function popupTwoClose(){
+function popupTwoClose() {
     const xMark = document.querySelector(".popup_two .fa-xmark");
-    xMark.addEventListener("click",(event)=>{
+    xMark.addEventListener("click", (event) => {
         event.preventDefault();
         const backgroundPopup = document.querySelector(".popupBackground");
         backgroundPopup.classList.toggle("active");
         const popupOne = document.querySelector(".popup_two");
         popupOne.classList.toggle("popup_display_none");
+        const form = document.querySelector(".popup_two form");
+        form.reset();
     })
 }
 
-function popupOneClose(){
+function popupOneClose() {
     const xMark = document.querySelector(".popup_one .fa-xmark");
-    xMark.addEventListener("click",(event)=>{
+    xMark.addEventListener("click", (event) => {
         event.preventDefault();
         const backgroundPopup = document.querySelector(".popupBackground");
         backgroundPopup.classList.toggle("active");
@@ -292,9 +396,12 @@ async function init() {
         popupOne();
         popupOneClose();
         popupTwo();
+        submitValidation();
         ajouterPhoto();
         popupTwoClose();
         popupTwoArrow();
+        previewChange();
+        postImage();
     }
 }
 
