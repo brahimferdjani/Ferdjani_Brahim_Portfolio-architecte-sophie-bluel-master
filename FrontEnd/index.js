@@ -247,13 +247,38 @@ function popupTwo() {
 
 function submitValidation() {
 
+    const form = document.querySelector(".popup_two form");
+    const blue = document.querySelector("#blue");
     const valider = document.querySelector("#valider");
     const file = document.querySelector("#image");
     const title = document.querySelector("#title");
     const category = document.querySelector("#category");
-    if (title.value == " " && category.value == " ") {
-        valider.classList.remove("valider");
-    }
+
+    form.addEventListener("submit", (event)=>{
+        event.preventDefault();
+
+        let isValid = true;
+
+        if(file.value == ""){
+            isValid = false;
+            blue.classList.add("red_flag");
+        }
+
+        if(title.value == ""){
+            isValid = false;
+            title.classList.add("red_flag");
+        }
+
+        if(category.value == ""){
+            isValid = false;
+            category.classList.add("red_flag");
+        }
+
+        if(isValid == true){
+            //postImage();
+            form.submit();
+        }
+    })
 
 }
 
