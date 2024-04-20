@@ -31,7 +31,7 @@ async function renderWorks(works) {
         html += htmlSegment;
     });
 
-    const gallery = document.querySelector(".gallery");
+    const gallery = document.querySelector("main .gallery");
     gallery.innerHTML = html;
 }
 
@@ -87,13 +87,13 @@ function headSettingFontScript() {
 }
 
 function modeEdition() {
-    const html = document.querySelector("html");
+    const body = document.querySelector("body");
     const divBox = document.createElement("div");
     divBox.setAttribute("id", "edition_mode");
     divBox.classList.add("mode_edition");
     const iFontAwesome = `<p><i class="fa-regular fa-pen-to-square"></i>Mode édition</p>`;
     divBox.innerHTML = iFontAwesome;
-    html.prepend(divBox);
+    body.prepend(divBox);
 }
 
 function buttonEdit() {
@@ -115,14 +115,14 @@ function popupBackground() {
     const backgroundPopup = document.createElement("div");
     backgroundPopup.setAttribute("id", "popup_background");
     backgroundPopup.classList.add("popupBackground");
-    const html = document.querySelector("html");
-    html.prepend(backgroundPopup);
+    const body = document.querySelector("body");
+    body.prepend(backgroundPopup);
 
     backgroundPopup.addEventListener("click", async () => {
         const popupBackground = document.querySelector(".popupBackground");
         const popup = document.querySelector("#popup");
-        html.removeChild(backgroundPopup);
-        html.removeChild(popup);
+        body.removeChild(backgroundPopup);
+        body.removeChild(popup);
         const works = await getWorks();
         renderWorks(works);
     })
@@ -131,7 +131,7 @@ function popupBackground() {
 }
 
 async function popupOne() {
-    const html = document.querySelector("html");
+    const body = document.querySelector("body");
     const backgroundPopup = document.querySelector("#popup_background");
     const editionMode = document.querySelector("#edition_mode");
     const popupBox = document.createElement("div");
@@ -148,7 +148,7 @@ async function popupOne() {
     popupBox.innerHTML = insidePopup;
     popupBox.setAttribute("id", "popup");
     popupBox.classList.add("popup_one");
-    html.insertBefore(popupBox, editionMode);
+    body.insertBefore(popupBox, editionMode);
     backgroundPopup.classList.add("active");
     galleryPopup();
     popupClose();
@@ -167,10 +167,12 @@ async function galleryPopup() {
         </a>`;
         figure.classList.add("gallery_popupone");
         contentPopupOne.append(figure);
-        figure.addEventListener("click", (event) => {
+        figure.addEventListener("click", async (event) => {
             event.preventDefault();
             fetchDelete(work.id);
             figure.textContent = "";
+            const works = await getWorks();
+            renderWorks(works);
         })
     })
 }
@@ -204,17 +206,17 @@ async function fetchDelete(id) {
 }
 
 function ajouterPhoto() {
-    const html = document.querySelector("html");
+    const body = document.querySelector("body");
     const popupOne = document.querySelector("#popup");
     const ajoutButton = document.querySelector("#popup button")
     ajoutButton.addEventListener("click", () => {
-        html.removeChild(popupOne);
+        body.removeChild(popupOne);
         popupTwo();
     })
 }
 
 function popupTwo() {
-    const html = document.querySelector("html");
+    const body = document.querySelector("body");
     const editionMode = document.querySelector("#edition_mode");
     const popupBox = document.createElement("div");
     const insidePopup =
@@ -245,22 +247,30 @@ function popupTwo() {
                 <option value="3">3</option>
             </select>
         </div>
-        <button type="submit" id="valider">Valider</button>
+        <button type="submit" id="valider" disabled>Valider</button>
     </form>`;
     popupBox.innerHTML = insidePopup;
     popupBox.setAttribute("id", "popup");
     popupBox.classList.add("popup_two");
-    html.insertBefore(popupBox, editionMode);
+    body.insertBefore(popupBox, editionMode);
     const form = document.querySelector("#popup_form");
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("change", (event) => {
         event.preventDefault();
+        submitValidation();
     })
-    submitValidation();
     popupClose();
     popupArrow();
     previewChange();
 }
 
+//taille fichier, message erreur, extension
+//body DONE! XXX 
+//work en meme temps que modale DONE! XXX
+//valider = fetch, ok = afficher 1er modale
+
+/**
+ * function qui permet de saisir tout les champs du formulaire avant de valider
+ */
 function submitValidation() {
 
     const valider = document.querySelector("#valider");
@@ -268,15 +278,9 @@ function submitValidation() {
     const title = document.querySelector("#title");
     const category = document.querySelector("#category");
 
-    if (file.value == "") { 
-        valider.setAttribute("disabled", "true");}
-    else if (title.value == "") {
-        valider.setAttribute("disabled", "true");} 
-    else if (category.value == "") {
-        valider.setAttribute("disabled", "true");} 
-    else {
+    if (!file.value == "" && !title.value == "" && !category.value == "") {
         valider.setAttribute("disabled", "false");
-        valider.classList.add("validation")
+        valider.classList.add("validation");
     }
 }
 
@@ -315,6 +319,11 @@ async function postImage() {
     }
 }
 
+/**
++ * Initializes the preview change functionality.
++ *
++ * @return {undefined} This function does not return a value.
++ */
 function previewChange() {
     const inputFile = document.querySelector("#image");
     const file = inputFile.files;
@@ -341,19 +350,22 @@ function previewImage() {
             blueImg.setAttribute("src", event.target.result);
         }
         fileReader.readAsDataURL(file[0]);
+        const selectFile = file[0];
+        console.log(selectFile.size);
+        console.log(selectFile.type);
         console.log(file);
     }
 }
 
 function popupArrow() {
     const arrow = document.querySelector("#popup i.fa-arrow-left");
-    const html = document.querySelector("html");
+    const body = document.querySelector("body");
     arrow.addEventListener("click", (event) => {
         event.preventDefault();
         const form = document.querySelector("#popup_form");
         form.reset();
         const popup = document.querySelector("#popup");
-        html.removeChild(popup);
+        body.removeChild(popup);
         popupOne();
     })
 }
@@ -365,10 +377,10 @@ function popupClose() {
     xMark.addEventListener("click", async (event) => {
         event.preventDefault();
         if (form) { form.reset(); }
-        const html = document.querySelector("html");
+        const body = document.querySelector("body");
         const popupBackground = document.querySelector("#popup_background");
-        if (html.childNodes[0] == popupBackground) { html.removeChild(popupBackground); }
-        html.removeChild(popup);
+        if (body.childNodes[0] == popupBackground) { body.removeChild(popupBackground); }
+        body.removeChild(popup);
         const works = await getWorks();
         renderWorks(works);
     })
@@ -387,6 +399,13 @@ async function init() {
         modeEdition();
         buttonEdit();
     }
+
+    let isvalide = true;
+    const totale = 3 + 2;
+    if (totale == 10) {
+        isvalide = false;
+    }
+    console.log(isvalide);
 }
 
 init();
