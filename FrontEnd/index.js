@@ -1,8 +1,9 @@
 function loginLogout() {
     const li = document.querySelectorAll("header nav ul li");
-    if (!localStorage.token) {
+    const token = localStorage.getItem("token");
+    if (!token) {
         li[2].innerHTML = `<a id="login" href="login.html">Login</a>`;
-    } else if (localStorage.token) {
+    } else {
         li[2].innerHTML = `<a id="login" href="login.html">Logout</a>`;
         li[2].addEventListener("click", (event) => {
             localStorage.removeItem("token");
@@ -72,10 +73,10 @@ async function renderCategories() {
 
 async function filtreWorks(id) {
     const works = await getWorks();
-    const filtreDeWorks = works.filter(function (work) {
+    const filtreWorks = works.filter((work)=> {
         return work.categoryId === id;
     });
-    return renderWorks(filtreDeWorks);
+    return renderWorks(filtreWorks);
 }
 
 function headSettingFontScript() {
@@ -141,7 +142,8 @@ async function popupOne() {
         <a href="#"><i class="fa-solid fa-xmark"></i></a>
     </div>
     <div class="title">
-        <h3>Galerie Photo</h3><p class="errorMessage"></p>
+        <h3>Galerie Photo</h3>
+        <p id="error-Message"></p>
     </div>
     <div class="content"></div>
     <button type="button">Ajouter une photo</button>`;
@@ -188,7 +190,7 @@ async function fetchDelete(id) {
         });
 
         if (!reponse.ok) {
-            const errorMsgSelect = document.querySelector("#error_message");
+            const errorMsgSelect = document.querySelector("#error-Message");
 
             if (reponse.status == "500") {
                 errorMsgSelect.textContent = "Unexpected Behaviour";
@@ -225,7 +227,8 @@ function popupTwo() {
         <a href="#"><i class="fa-solid fa-xmark"></i></a>
     </div>
     <div class="title">
-        <h3>Ajout Photo</h3><p class="errorMessage"></p>
+        <h3>Ajout Photo</h3>
+        <p id="errorMessage"></p>
     </div>
     <form id="popup_form">
         <div id="blue">
@@ -247,25 +250,21 @@ function popupTwo() {
                 <option value="3">3</option>
             </select>
         </div>
-        <button type="submit" id="valider" disabled>Valider</button>
+        <button type="submit" id="valider">Valider</button>
     </form>`;
     popupBox.innerHTML = insidePopup;
     popupBox.setAttribute("id", "popup");
     popupBox.classList.add("popup_two");
     body.insertBefore(popupBox, editionMode);
-    const form = document.querySelector("#popup_form");
-    form.addEventListener("change", (event) => {
-        event.preventDefault();
-        submitValidation();
-    })
+    submitValidation();
     popupClose();
     popupArrow();
     previewChange();
 }
 
-//taille fichier, message erreur, extension
-//body DONE! XXX 
-//work en meme temps que modale DONE! XXX
+//XXX taille fichier, message erreur, extension DONE! XXX
+//XXX body DONE! XXX 
+//XXX work en meme temps que modale DONE! XXX
 //valider = fetch, ok = afficher 1er modale
 
 /**
@@ -277,17 +276,40 @@ function submitValidation() {
     const file = document.querySelector("#image");
     const title = document.querySelector("#title");
     const category = document.querySelector("#category");
+    const selectFile = file.files[0];
+    const form = document.querySelector("#popup_form");
 
-    if (!file.value == "" && !title.value == "" && !category.value == "") {
-        valider.setAttribute("disabled", "false");
-        valider.classList.add("validation");
-    }
+    valider.setAttribute("disabled", true);
+
+    form.addEventListener("change", () => {
+        if (!file.value == "" && !title.value == "" && !category.value == "" && selectFile.size < 4194304 && (selectFile.type == "image/png" || selectFile.type == "image/jpeg")) {
+            valider.classList.add("validation");
+            valider.setAttribute("disabled", false);
+        }
+    
+        if (!selectFile.size > 4194304) {
+            const errorMsgSelect = document.querySelector("#errorMessage");
+            errorMsgSelect.textContent = "Fichier trop volumineux";
+        }
+        if (!selectFile.type == "image/png" || !selectFile.type == "image/jpeg") {
+            const errorMsgSelect = document.querySelector("#errorMessage");
+            errorMsgSelect.textContent = "Fichier non supporté";
+        }
+        const errorMessage = document.querySelector("#errorMessage");
+        errorMessage.textContent = "";
+    })  
 }
 
 async function postImage() {
-    const form = document.querySelector("#popup_form")
+    const file = document.querySelector("#image");
+    const title = document.querySelector("#title");
+    const category = document.querySelector("#category");
+    const selectFile = file.files[0];
+    const formData = new FormData();
+    formData.append("image", selectFile);
+    formData.append("title", title.value);
+    formData.append("category", category.value);    
     const url = "http://localhost:5678/api/works";
-    const formData = new FormData(form);
     console.log([...formData]);
     const localToken = localStorage.token;
     try {
@@ -298,7 +320,7 @@ async function postImage() {
         });
 
         if (!reponse.ok) {
-            const errorMsgSelect = document.querySelector("#error_message");
+            const errorMsgSelect = document.querySelector("#errorMessage");
 
             if (reponse.status == "500") {
                 errorMsgSelect.textContent = "Unexpected Error";
@@ -320,10 +342,8 @@ async function postImage() {
 }
 
 /**
-+ * Initializes the preview change functionality.
-+ *
-+ * @return {undefined} This function does not return a value.
-+ */
+ * function qui permet de cacher le texte dans la boite d'image
+ */
 function previewChange() {
     const inputFile = document.querySelector("#image");
     const file = inputFile.files;
@@ -340,6 +360,9 @@ function previewChange() {
     })
 }
 
+/**
+ * function qui permet de afficher l'image et empecher une image volumineuse et de type non supporté 
+ */
 function previewImage() {
     const inputFile = document.querySelector("#image");
     const file = inputFile.files;
@@ -350,13 +373,12 @@ function previewImage() {
             blueImg.setAttribute("src", event.target.result);
         }
         fileReader.readAsDataURL(file[0]);
-        const selectFile = file[0];
-        console.log(selectFile.size);
-        console.log(selectFile.type);
-        console.log(file);
     }
 }
 
+/**
+ * function qui permet de 
+ */
 function popupArrow() {
     const arrow = document.querySelector("#popup i.fa-arrow-left");
     const body = document.querySelector("body");
@@ -399,13 +421,6 @@ async function init() {
         modeEdition();
         buttonEdit();
     }
-
-    let isvalide = true;
-    const totale = 3 + 2;
-    if (totale == 10) {
-        isvalide = false;
-    }
-    console.log(isvalide);
 }
 
 init();

@@ -469,6 +469,12 @@ a {
 	margin: 1em auto;
 }
 
-.red_flag{
-	border: 1px solid red;
+#error-Message {
+	color: red;
+	margin-bottom: .5em;
+}
+
+#errorMessage{
+	color: red;
+	margin-bottom: .5em;
 }
