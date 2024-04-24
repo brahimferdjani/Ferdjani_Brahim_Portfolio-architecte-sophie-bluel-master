@@ -173,6 +173,7 @@ async function galleryPopup() {
     const contentPopupOne = document.querySelector(".popup_one .content");
     const works = await getWorks();
     works.forEach(work => {
+        renderWorks(works);
         const figure = document.createElement("figure");
         figure.innerHTML =
             `<a href="#">
@@ -185,7 +186,7 @@ async function galleryPopup() {
             event.preventDefault();
             fetchDelete(work.id);
             figure.textContent = "";
-            const works = await getWorks();
+            works = await getWorks();
             renderWorks(works);
         })
     })
@@ -273,11 +274,14 @@ function popupTwo() {
     const valider = document.querySelector("#valider");
     const form = document.querySelector("#popup_form");
     form.addEventListener("change", submitValidation);
-    valider.addEventListener("click", async ()=>{
+    valider.addEventListener("click", async (event)=>{
         const image = document.querySelector("#image");
         const title = document.querySelector("#title");
         const category = document.querySelector("#category");
         postImage(image, title, category);
+        event.preventDefault();
+        body.removeChild(popupBox);
+        popupOne();
         const works = await getWorks();
         renderWorks(works);
     });
