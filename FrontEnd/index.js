@@ -132,8 +132,8 @@ function popupBackground() {
 }
 
 async function popupOne() {
-    const works = await getWorks();
-    renderWorks(works);
+    const pics = await getWorks();
+    renderWorks(pics);
     const body = document.querySelector("body");
     const backgroundPopup = document.querySelector("#popup_background");
     const editionMode = document.querySelector("#edition_mode");
@@ -175,6 +175,7 @@ async function galleryPopup() {
     const contentPopupOne = document.querySelector(".popup_one .content");
     const works = await getWorks();
     works.forEach(work => {
+        renderWorks(works);
         const figure = document.createElement("figure");
         figure.innerHTML =
             `<a href="#">
@@ -187,8 +188,8 @@ async function galleryPopup() {
             event.preventDefault();
             fetchDelete(work.id);
             figure.textContent = "";
-            works = await getWorks();
-            renderWorks(works);
+            const pics = await getWorks();
+            renderWorks(pics);
         })
     })
 }
@@ -284,34 +285,6 @@ function popupTwo() {
         body.removeChild(popupBox);
         popupOne();
     });
-}
-
-/**
- * Fonction permettant de valider le poids et le format du fichier image
- */
-function validateFile(event){
-    const errorMessage = document.querySelector("#errorMessage");
-    errorMessage.textContent = "";
-    for (const file of event.target.files) {
-        if (file.size > 4194304) {
-            errorMessage.textContent = "Fichier trop volumineux";
-        }
-        if (file.type != "image/png" && file.type != "image/jpeg") {
-            errorMessage.textContent = "Seuls les formats .jpg et .png sont autorisés";
-        }
-    }
-}
-
-//XXX taille fichier, message erreur, extension DONE! XXX
-//XXX body DONE! XXX 
-//XXX work en meme temps que modale DONE! XXX
-//valider = fetch, ok = afficher 1er modale
-
-function retourModaleUn() {
-    const body = document.querySelector("body");
-    const popup = document.querySelector("#popup");
-    body.removeChild(popup);
-    postImage();
 }
 
 /**
