@@ -288,6 +288,22 @@ function popupTwo() {
 }
 
 /**
+ * Fonction permettant de valider le poids et le format du fichier image
+ */
+function validateFile(event){
+    const errorMessage = document.querySelector("#errorMessage");
+    errorMessage.textContent = "";
+    for (const file of event.target.files) {
+        if (file.size > 4194304) {
+            errorMessage.textContent = "Fichier trop volumineux";
+        }
+        if (file.type != "image/png" && file.type != "image/jpeg") {
+            errorMessage.textContent = "Seuls les formats .jpg et .png sont autorisés";
+        }
+    }
+}
+
+/**
  * function qui permet de saisir tout les champs du formulaire avant de valider
  */
 function submitValidation() {
